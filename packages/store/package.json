@@ -1,0 +1,38 @@
+{
+  "name": "@web3-solid/store",
+  "keywords": [
+    "web3-solid"
+  ],
+  "author": "Noah Zinsmeister <noahwz@gmail.com>",
+  "license": "GPL-3.0-or-later",
+  "repository": "github:NoahZinsmeister/web3-solid",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "8.0.5-beta.0",
+  "type": "module",
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/cjs/index.js"
+  },
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "main": "./dist/cjs/index.js",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "tsc && tsc --project tsconfig.cjs.json",
+    "start": "tsc --watch"
+  },
+  "dependencies": {
+    "@ethersproject/address": "^5.4.0",
+    "@web3-solid/types": "^8.0.3-beta.0",
+    "zustand": "^4.0.0-beta.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.5"
+  }
+}
