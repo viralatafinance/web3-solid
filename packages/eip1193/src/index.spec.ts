@@ -1,7 +1,7 @@
 import { Eip1193Bridge } from '@ethersproject/experimental'
 import { Web3Provider } from '@ethersproject/providers'
-import { createWeb3ReactStoreAndActions } from '@web3-solid/store'
-import type { Actions, ProviderRpcError, RequestArguments, Web3ReactStore } from '@web3-solid/types'
+import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
+import type { Actions, ProviderRpcError, RequestArguments, Web3SolidStore } from '@web3-solid/types'
 import { EventEmitter } from 'node:events'
 import { EIP1193 } from '.'
 
@@ -61,14 +61,14 @@ const accounts: string[] = []
 describe('EIP1193', () => {
   let mockProvider: MockEIP1193Provider
 
-  let store: Web3ReactStore
+  let store: Web3SolidStore
   let actions: Actions
 
   let connector: EIP1193
 
   beforeEach(() => {
     mockProvider = new MockEIP1193Provider()
-    ;[store, actions] = createWeb3ReactStoreAndActions()
+    ;[store, actions] = createWeb3SolidStoreAndActions()
   })
 
   describe('ethers', () => {

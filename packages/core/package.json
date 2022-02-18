@@ -9,7 +9,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "8.0.10-beta.0",
+  "version": "1.0.0",
   "type": "module",
   "files": [
     "dist/*"
@@ -28,8 +28,8 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@web3-solid/store": "^8.0.5-beta.0",
-    "@web3-solid/types": "^8.0.3-beta.0",
+    "@web3-solid/store": "1.0.0",
+    "@web3-solid/types": "1.0.0",
     "babel-preset-solid": "^1.3.6",
     "solid-js": "^1.3.7",
     "zustand": "^4.0.0-beta.0"

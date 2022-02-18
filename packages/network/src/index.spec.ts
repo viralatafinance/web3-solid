@@ -1,5 +1,5 @@
-import { createWeb3ReactStoreAndActions } from '@web3-solid/store'
-import type { Actions, Web3ReactStore } from '@web3-solid/types'
+import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
+import type { Actions, Web3SolidStore } from '@web3-solid/types'
 import { MockEip1193Bridge } from '../../url/src/index.spec'
 import { Network } from './'
 
@@ -18,14 +18,14 @@ const chainId = '0x1'
 const accounts: string[] = []
 
 describe('Url', () => {
-  let store: Web3ReactStore
+  let store: Web3SolidStore
   let connector: Network
   let mockConnector: MockEip1193Bridge
 
   describe('connectEagerly = true', () => {
     beforeEach(() => {
       let actions: Actions
-      ;[store, actions] = createWeb3ReactStoreAndActions()
+      ;[store, actions] = createWeb3SolidStoreAndActions()
       connector = new Network(actions, { 1: 'https://mock.url' })
     })
 
@@ -50,7 +50,7 @@ describe('Url', () => {
   describe('connectEagerly = false', () => {
     beforeEach(() => {
       let actions: Actions
-      ;[store, actions] = createWeb3ReactStoreAndActions()
+      ;[store, actions] = createWeb3SolidStoreAndActions()
       connector = new Network(actions, { 1: 'https://mock.url' }, false)
     })
 
@@ -88,7 +88,7 @@ describe('Url', () => {
   describe('array of urls', () => {
     beforeEach(() => {
       let actions: Actions
-      ;[store, actions] = createWeb3ReactStoreAndActions()
+      ;[store, actions] = createWeb3SolidStoreAndActions()
       connector = new Network(actions, { 1: ['https://1.mock.url', 'https://2.mock.url'] })
     })
 
@@ -113,7 +113,7 @@ describe('Url', () => {
   describe('multiple chains', () => {
     beforeEach(() => {
       let actions: Actions
-      ;[store, actions] = createWeb3ReactStoreAndActions()
+      ;[store, actions] = createWeb3SolidStoreAndActions()
       connector = new Network(actions, { 1: 'https://mainnet.mock.url', 2: 'https://testnet.mock.url' })
     })
 

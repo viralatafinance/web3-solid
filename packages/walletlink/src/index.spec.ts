@@ -1,5 +1,5 @@
-import { createWeb3ReactStoreAndActions } from '@web3-solid/store'
-import type { Actions, Web3ReactStore } from '@web3-solid/types'
+import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
+import type { Actions, Web3SolidStore } from '@web3-solid/types'
 import { WalletLink } from '.'
 import { MockEIP1193Provider } from '../../eip1193/src/index.spec'
 
@@ -15,14 +15,14 @@ const chainId = '0x1'
 const accounts: string[] = []
 
 describe('WalletLink', () => {
-  let store: Web3ReactStore
+  let store: Web3SolidStore
   let connector: WalletLink
   let mockConnector: MockEIP1193Provider
 
   describe('connectEagerly = true', () => {
     beforeEach(() => {
       let actions: Actions
-      ;[store, actions] = createWeb3ReactStoreAndActions()
+      ;[store, actions] = createWeb3SolidStoreAndActions()
       connector = new WalletLink(actions, {
         appName: 'test',
         url: 'https://mock.url',

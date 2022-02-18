@@ -1,5 +1,5 @@
-import { createWeb3ReactStoreAndActions } from '@web3-solid/store'
-import type { Actions, RequestArguments, Web3ReactStore } from '@web3-solid/types'
+import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
+import type { Actions, RequestArguments, Web3SolidStore } from '@web3-solid/types'
 import { Url } from '.'
 import { MockEIP1193Provider } from '../../eip1193/src/index.spec'
 
@@ -39,14 +39,14 @@ const HALF_INITIALIZED_STATE_BECAUSE_OF_MOCKS = {
 }
 
 describe('Url', () => {
-  let store: Web3ReactStore
+  let store: Web3SolidStore
   let connector: Url
   let mockConnector: MockEip1193Bridge
 
   describe('connectEagerly = true', () => {
     beforeEach(() => {
       let actions: Actions
-      ;[store, actions] = createWeb3ReactStoreAndActions()
+      ;[store, actions] = createWeb3SolidStoreAndActions()
       connector = new Url(actions, 'https://mock.url')
     })
 
@@ -75,7 +75,7 @@ describe('Url', () => {
   describe('connectEagerly = false', () => {
     beforeEach(() => {
       let actions: Actions
-      ;[store, actions] = createWeb3ReactStoreAndActions()
+      ;[store, actions] = createWeb3SolidStoreAndActions()
       connector = new Url(actions, 'https://mock.url', false)
     })
 

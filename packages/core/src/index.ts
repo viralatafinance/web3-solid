@@ -1,18 +1,18 @@
 import { Networkish } from '@ethersproject/networks'
 import { Web3Provider } from '@ethersproject/providers'
-import { createWeb3ReactStoreAndActions } from '@web3-solid/store'
-import { Actions, Connector, Web3ReactState, Web3ReactStore } from '@web3-solid/types'
+import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
+import { Actions, Connector, Web3SolidState, Web3SolidStore } from '@web3-solid/types'
 import { createSignal, createMemo, createEffect } from 'solid-js'
 import { EqualityChecker, UseBoundStore } from 'zustand'
 import create from 'zustand'
 
-export type Web3ReactHooks = ReturnType<typeof getStateHooks> &
+export type Web3SolidHooks = ReturnType<typeof getStateHooks> &
   ReturnType<typeof getDerivedHooks> &
   ReturnType<typeof getAugmentedHooks>
 
-export type Web3ReactSelectedHooks = ReturnType<typeof getSelectedConnector>
+export type Web3SolidSelectedHooks = ReturnType<typeof getSelectedConnector>
 
-export type Web3ReactPriorityHooks = ReturnType<typeof getPriorityConnector>
+export type Web3SolidPriorityHooks = ReturnType<typeof getPriorityConnector>
 
 /**
  * Wraps the initialization of a `connector`. Creates a zustand `store` with `actions` bound to it, and then passes
@@ -28,11 +28,11 @@ export type Web3ReactPriorityHooks = ReturnType<typeof getPriorityConnector>
 export function initializeConnector<T extends Connector> (
   f: (actions: Actions) => T,
   allowedChainIds?: number[]
-): [T, Web3ReactHooks, Web3ReactStore] {
-  const [store, actions] = createWeb3ReactStoreAndActions(allowedChainIds)
+): [T, Web3SolidHooks, Web3SolidStore] {
+  const [store, actions] = createWeb3SolidStoreAndActions(allowedChainIds)
 
   const connector = f(actions)
-  const useConnector = create<Web3ReactState>(store)
+  const useConnector = create<Web3SolidState>(store)
 
   const stateHooks = getStateHooks(useConnector)
   const derivedHooks = getDerivedHooks(stateHooks)
@@ -41,7 +41,7 @@ export function initializeConnector<T extends Connector> (
   return [connector, { ...stateHooks, ...derivedHooks, ...augmentedHooks }, store]
 }
 
-function computeIsActive ({ chainId, accounts, activating, error }: Web3ReactState) {
+function computeIsActive ({ chainId, accounts, activating, error }: Web3SolidState) {
   return Boolean(chainId && accounts && !activating && !error)
 }
 
@@ -51,7 +51,7 @@ function computeIsActive ({ chainId, accounts, activating, error }: Web3ReactSta
  * @param initializedConnectors - Two or more [connector, hooks] arrays, as returned from initializeConnector.
  * @returns hooks - A variety of convenience hooks that wrap the hooks returned from initializeConnector.
  */
-export function getSelectedConnector (...initializedConnectors: [Connector, Web3ReactHooks][]) {
+export function getSelectedConnector (...initializedConnectors: [Connector, Web3SolidHooks][]) {
   function getIndex (connector: Connector) {
     const index = initializedConnectors.findIndex(([initializedConnector]) => connector === initializedConnector)
     if (index === -1) throw new Error('Connector not found')
@@ -119,11 +119,11 @@ export function getSelectedConnector (...initializedConnectors: [Connector, Web3
     return values[index]
   }
 
-  function useSelectedWeb3React (connector: Connector, provider: Web3Provider | undefined) {
+  function useSelectedWeb3Solid (connector: Connector, provider: Web3Provider | undefined) {
     const index = getIndex(connector)
-    const values = initializedConnectors.map(([, { useWeb3React }], i) =>
+    const values = initializedConnectors.map(([, { useWeb3 }], i) =>
       // eslint-disable-next-line react-hooks/rules-of-hooks
-      useWeb3React(i === index ? provider : undefined)
+      useWeb3(i === index ? provider : undefined)
     )
     return values[index]
   }
@@ -138,7 +138,7 @@ export function getSelectedConnector (...initializedConnectors: [Connector, Web3
     useSelectedProvider,
     useSelectedENSNames,
     useSelectedENSName,
-    useSelectedWeb3React
+    useSelectedWeb3Solid
   }
 }
 
@@ -149,7 +149,7 @@ export function getSelectedConnector (...initializedConnectors: [Connector, Web3
  * @param initializedConnectors - Two or more [connector, hooks] arrays, as returned from initializeConnector.
  * @returns hooks - A variety of convenience hooks that wrap the hooks returned from initializeConnector.
  */
-export function getPriorityConnector (...initializedConnectors: [Connector, Web3ReactHooks][]) {
+export function getPriorityConnector (...initializedConnectors: [Connector, Web3SolidHooks][]) {
   const {
     useSelectedChainId,
     useSelectedAccounts,
@@ -160,7 +160,7 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
     useSelectedProvider,
     useSelectedENSNames,
     useSelectedENSName,
-    useSelectedWeb3React
+    useSelectedWeb3Solid
   } = getSelectedConnector(...initializedConnectors)
 
   function usePriorityConnector () {
@@ -206,8 +206,8 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
     return useSelectedENSName(usePriorityConnector(), provider)
   }
 
-  function usePriorityWeb3React (provider: Web3Provider | undefined) {
-    return useSelectedWeb3React(usePriorityConnector(), provider)
+  function usePriorityWeb3Solid (provider: Web3Provider | undefined) {
+    return useSelectedWeb3Solid(usePriorityConnector(), provider)
   }
 
   return {
@@ -220,7 +220,7 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
     useSelectedProvider,
     useSelectedENSNames,
     useSelectedENSName,
-    useSelectedWeb3React,
+    useSelectedWeb3Solid,
     usePriorityConnector,
     usePriorityChainId,
     usePriorityAccounts,
@@ -231,34 +231,34 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
     usePriorityProvider,
     usePriorityENSNames,
     usePriorityENSName,
-    usePriorityWeb3React
+    usePriorityWeb3Solid
   }
 }
 
-const CHAIN_ID = (state: Web3ReactState) => state.chainId
-const ACCOUNTS = (state: Web3ReactState) => state.accounts
-const ACCOUNTS_EQUALITY_CHECKER: EqualityChecker<Web3ReactState['accounts']> = (oldAccounts, newAccounts) =>
+const CHAIN_ID = (state: Web3SolidState) => state.chainId
+const ACCOUNTS = (state: Web3SolidState) => state.accounts
+const ACCOUNTS_EQUALITY_CHECKER: EqualityChecker<Web3SolidState['accounts']> = (oldAccounts, newAccounts) =>
   (oldAccounts === undefined && newAccounts === undefined) ||
   (oldAccounts !== undefined &&
     oldAccounts.length === newAccounts?.length &&
     oldAccounts.every((oldAccount, i) => oldAccount === newAccounts[i]))
-const ACTIVATING = (state: Web3ReactState) => state.activating
-const ERROR = (state: Web3ReactState) => state.error
+const ACTIVATING = (state: Web3SolidState) => state.activating
+const ERROR = (state: Web3SolidState) => state.error
 
-function getStateHooks (useConnector: UseBoundStore<Web3ReactState>) {
-  function useChainId (): Web3ReactState['chainId'] {
+function getStateHooks (useConnector: UseBoundStore<Web3SolidState>) {
+  function useChainId (): Web3SolidState['chainId'] {
     return useConnector(CHAIN_ID)
   }
 
-  function useAccounts (): Web3ReactState['accounts'] {
+  function useAccounts (): Web3SolidState['accounts'] {
     return useConnector(ACCOUNTS, ACCOUNTS_EQUALITY_CHECKER)
   }
 
-  function useIsActivating (): Web3ReactState['activating'] {
+  function useIsActivating (): Web3SolidState['activating'] {
     return useConnector(ACTIVATING)
   }
 
-  function useError (): Web3ReactState['error'] {
+  function useError (): Web3SolidState['error'] {
     return useConnector(ERROR)
   }
 
@@ -359,7 +359,7 @@ function getAugmentedHooks<T extends Connector> (
   }
 
   // for backwards compatibility only
-  function useWeb3React (provider: Web3Provider | undefined) {
+  function useWeb3 (provider: Web3Provider | undefined) {
     const chainId = useChainId()
     const account = useAccount()
     const error = useError()
@@ -379,5 +379,5 @@ function getAugmentedHooks<T extends Connector> (
     )
   }
 
-  return { useProvider, useENSNames, useENSName, useWeb3React }
+  return { useProvider, useENSNames, useENSName, useWeb3 }
 }

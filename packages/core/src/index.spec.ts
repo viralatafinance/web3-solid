@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react-hooks'
 import type { Actions } from '@web3-solid/types'
 import { Connector } from '@web3-solid/types'
-import type { Web3ReactHooks, Web3ReactPriorityHooks, Web3ReactSelectedHooks } from '.'
+import type { Web3SolidHooks, Web3SolidPriorityHooks, Web3SolidSelectedHooks } from '.'
 import { getPriorityConnector, getSelectedConnector, initializeConnector } from '.'
 
 class MockConnector extends Connector {
@@ -23,7 +23,7 @@ class MockConnector2 extends MockConnector {}
 
 describe('#initializeConnector', () => {
   let connector: MockConnector
-  let hooks: Web3ReactHooks
+  let hooks: Web3SolidHooks
 
   beforeEach(() => {
     ;[connector, hooks] = initializeConnector((actions) => new MockConnector(actions))
@@ -119,12 +119,12 @@ describe('#initializeConnector', () => {
 
 describe('#getSelectedConnector', () => {
   let connector: MockConnector
-  let hooks: Web3ReactHooks
+  let hooks: Web3SolidHooks
 
   let connector2: MockConnector
-  let hooks2: Web3ReactHooks
+  let hooks2: Web3SolidHooks
 
-  let selectedConnectorHooks: Web3ReactSelectedHooks
+  let selectedConnectorHooks: Web3SolidSelectedHooks
 
   beforeEach(() => {
     ;[connector, hooks] = initializeConnector((actions) => new MockConnector(actions))
@@ -180,12 +180,12 @@ describe('#getSelectedConnector', () => {
 
 describe('#getPriorityConnector', () => {
   let connector: MockConnector
-  let hooks: Web3ReactHooks
+  let hooks: Web3SolidHooks
 
   let connector2: MockConnector
-  let hooks2: Web3ReactHooks
+  let hooks2: Web3SolidHooks
 
-  let priorityConnectorHooks: Web3ReactPriorityHooks
+  let priorityConnectorHooks: Web3SolidPriorityHooks
 
   beforeEach(() => {
     ;[connector, hooks] = initializeConnector((actions) => new MockConnector(actions))

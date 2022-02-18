@@ -1,16 +1,16 @@
 import type { EventEmitter } from 'node:events'
 import type { State, StoreApi } from 'zustand/vanilla'
 
-export interface Web3ReactState extends State {
+export interface Web3SolidState extends State {
   chainId: number | undefined
   accounts: string[] | undefined
   activating: boolean
   error: Error | undefined
 }
 
-export type Web3ReactStore = StoreApi<Web3ReactState>
+export type Web3SolidStore = StoreApi<Web3SolidState>
 
-export type Web3ReactStateUpdate =
+export type Web3SolidStateUpdate =
   | {
       chainId: number
       accounts: string[]
@@ -26,7 +26,7 @@ export type Web3ReactStateUpdate =
 
 export interface Actions {
   startActivation: () => () => void
-  update: (stateUpdate: Web3ReactStateUpdate) => void
+  update: (stateUpdate: Web3SolidStateUpdate) => void
   reportError: (error: Error | undefined) => void
 }
 

@@ -1,5 +1,5 @@
 import { getAddress } from '@ethersproject/address'
-import type { Actions, Web3ReactState, Web3ReactStateUpdate, Web3ReactStore } from '@web3-solid/types'
+import type { Actions, Web3SolidState, Web3SolidStateUpdate, Web3SolidStore } from '@web3-solid/types'
 import create from 'zustand/vanilla'
 
 /**
@@ -44,12 +44,12 @@ const DEFAULT_STATE = {
   error: undefined,
 }
 
-export function createWeb3ReactStoreAndActions(allowedChainIds?: number[]): [Web3ReactStore, Actions] {
+export function createWeb3SolidStoreAndActions(allowedChainIds?: number[]): [Web3SolidStore, Actions] {
   if (allowedChainIds?.length === 0) {
     throw new Error(`allowedChainIds is length 0`)
   }
 
-  const store = create<Web3ReactState>(() => DEFAULT_STATE)
+  const store = create<Web3SolidState>(() => DEFAULT_STATE)
 
   // flag for tracking updates so we don't clobber data when cancelling activation
   let nullifier = 0
@@ -80,7 +80,7 @@ export function createWeb3ReactStoreAndActions(allowedChainIds?: number[]): [Web
    *
    * @param stateUpdate - The state update to report.
    */
-  function update(stateUpdate: Web3ReactStateUpdate): void {
+  function update(stateUpdate: Web3SolidStateUpdate): void {
     // validate chainId statically, independent of existing state
     if (stateUpdate.chainId !== undefined) {
       validateChainId(stateUpdate.chainId)
@@ -95,7 +95,7 @@ export function createWeb3ReactStoreAndActions(allowedChainIds?: number[]): [Web
 
     nullifier++
 
-    store.setState((existingState): Web3ReactState => {
+    store.setState((existingState): Web3SolidState => {
       // determine the next chainId and accounts
       const chainId = stateUpdate.chainId ?? existingState.chainId
       const accounts = stateUpdate.accounts ?? existingState.accounts

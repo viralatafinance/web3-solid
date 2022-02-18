@@ -1,5 +1,5 @@
-import { createWeb3ReactStoreAndActions } from '@web3-solid/store'
-import type { Actions, Web3ReactStore } from '@web3-solid/types'
+import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
+import type { Actions, Web3SolidStore } from '@web3-solid/types'
 import { MetaMask } from '.'
 import { MockEIP1193Provider } from '../../eip1193/src/index.spec'
 
@@ -17,12 +17,12 @@ describe('MetaMask', () => {
     ;(window as any).ethereum = mockProvider
   })
 
-  let store: Web3ReactStore
+  let store: Web3SolidStore
   let connector: MetaMask
 
   beforeEach(() => {
     let actions: Actions
-    ;[store, actions] = createWeb3ReactStoreAndActions()
+    ;[store, actions] = createWeb3SolidStoreAndActions()
     connector = new MetaMask(actions, false)
   })
 
