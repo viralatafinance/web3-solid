@@ -33,5 +33,6 @@
   },
   "peerDependencies": {
     "eth-provider": "^0.9.4"
-  }
+  },
+  "gitHead": "69a9cc79227adbb9051dc054688887fe294d71cc"
 }

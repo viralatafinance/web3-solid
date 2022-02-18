@@ -29,5 +29,6 @@
   },
   "dependencies": {
     "@web3-solid/types": "^1.0.2"
-  }
+  },
+  "gitHead": "69a9cc79227adbb9051dc054688887fe294d71cc"
 }
