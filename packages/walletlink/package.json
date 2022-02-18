@@ -10,7 +10,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "files": [
     "dist/*"
@@ -29,12 +29,12 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@web3-solid/types": "^1.0.1"
+    "@web3-solid/types": "^1.0.2"
   },
   "peerDependencies": {
     "walletlink": "^2.4.5"
   },
   "devDependencies": {
-    "@web3-solid/store": "^1.0.1"
+    "@web3-solid/store": "^1.0.2"
   }
 }
