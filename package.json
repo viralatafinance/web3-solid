@@ -12,7 +12,8 @@
     "build": "lerna run build",
     "prestart": "yarn build",
     "start": "lerna run start --parallel",
-    "prepack": "yarn build"
+    "prepack": "yarn build",
+    "publish": "lerna publish"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",
