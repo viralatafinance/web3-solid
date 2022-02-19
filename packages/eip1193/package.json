@@ -10,7 +10,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.0.4",
+  "version": "1.1.0",
   "type": "module",
   "files": [
     "dist/*"
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@ethersproject/experimental": "^5.5.0",
     "@ethersproject/providers": "^5.5.1",
-    "@web3-solid/store": "^1.0.4"
+    "@web3-solid/store": "^1.1.0"
   },
   "gitHead": "69a9cc79227adbb9051dc054688887fe294d71cc"
 }
