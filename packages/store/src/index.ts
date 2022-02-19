@@ -1,6 +1,6 @@
 import { getAddress } from '@ethersproject/address'
-import type { Actions, Web3SolidState, Web3SolidStateUpdate, Web3SolidStore } from '@web3-solid/types'
-import create from 'zustand/vanilla'
+import { Actions, Web3SolidState, Web3SolidStateUpdate, Web3SolidStore } from '@web3-solid/types'
+import create from 'solid-zustand'
 
 /**
  * MAX_SAFE_CHAIN_ID is the upper bound limit on what will be accepted for `chainId`
@@ -10,7 +10,7 @@ import create from 'zustand/vanilla'
  */
 export const MAX_SAFE_CHAIN_ID = 4503599627370476
 
-function validateChainId(chainId: number): void {
+function validateChainId (chainId: number): void {
   if (!Number.isInteger(chainId) || chainId <= 0 || chainId > MAX_SAFE_CHAIN_ID) {
     throw new Error(`Invalid chainId ${chainId}`)
   }
@@ -19,7 +19,7 @@ function validateChainId(chainId: number): void {
 export class ChainIdNotAllowedError extends Error {
   public readonly chainId: number
 
-  public constructor(chainId: number, allowedChainIds: number[]) {
+  public constructor (chainId: number, allowedChainIds: number[]) {
     super(`chainId ${chainId} not included in ${allowedChainIds.toString()}`)
     this.chainId = chainId
     this.name = ChainIdNotAllowedError.name
@@ -27,13 +27,13 @@ export class ChainIdNotAllowedError extends Error {
   }
 }
 
-function ensureChainIdIsAllowed(chainId: number, allowedChainIds: number[]): ChainIdNotAllowedError | undefined {
-  return allowedChainIds.some((allowedChainId) => chainId === allowedChainId)
+function ensureChainIdIsAllowed (chainId: number, allowedChainIds: number[]): ChainIdNotAllowedError | undefined {
+  return allowedChainIds.some(allowedChainId => chainId === allowedChainId)
     ? undefined
     : new ChainIdNotAllowedError(chainId, allowedChainIds)
 }
 
-function validateAccount(account: string): string {
+function validateAccount (account: string): string {
   return getAddress(account)
 }
 
@@ -41,10 +41,10 @@ const DEFAULT_STATE = {
   chainId: undefined,
   accounts: undefined,
   activating: false,
-  error: undefined,
+  error: undefined
 }
 
-export function createWeb3SolidStoreAndActions(allowedChainIds?: number[]): [Web3SolidStore, Actions] {
+export function createWeb3SolidStoreAndActions (allowedChainIds?: number[]): [Web3SolidStore, Actions] {
   if (allowedChainIds?.length === 0) {
     throw new Error(`allowedChainIds is length 0`)
   }
@@ -60,7 +60,7 @@ export function createWeb3SolidStoreAndActions(allowedChainIds?: number[]): [Web
    * @returns cancelActivation - A function that cancels the activation by setting activating to false,
    * as long as there haven't been any intervening updates.
    */
-  function startActivation(): () => void {
+  function startActivation (): () => void {
     const nullifierCached = ++nullifier
 
     store.setState({ ...DEFAULT_STATE, activating: true })
@@ -80,7 +80,7 @@ export function createWeb3SolidStoreAndActions(allowedChainIds?: number[]): [Web
    *
    * @param stateUpdate - The state update to report.
    */
-  function update(stateUpdate: Web3SolidStateUpdate): void {
+  function update (stateUpdate: Web3SolidStateUpdate): void {
     // validate chainId statically, independent of existing state
     if (stateUpdate.chainId !== undefined) {
       validateChainId(stateUpdate.chainId)
@@ -95,40 +95,42 @@ export function createWeb3SolidStoreAndActions(allowedChainIds?: number[]): [Web
 
     nullifier++
 
-    store.setState((existingState): Web3SolidState => {
-      // determine the next chainId and accounts
-      const chainId = stateUpdate.chainId ?? existingState.chainId
-      const accounts = stateUpdate.accounts ?? existingState.accounts
+    store.setState(
+      (existingState): Web3SolidState => {
+        // determine the next chainId and accounts
+        const chainId = stateUpdate.chainId ?? existingState.chainId
+        const accounts = stateUpdate.accounts ?? existingState.accounts
 
-      // determine the next error
-      let error = existingState.error
-      if (chainId && allowedChainIds) {
-        // if we have a chainId allowlist and a chainId, we need to ensure it's allowed
-        const chainIdError = ensureChainIdIsAllowed(chainId, allowedChainIds)
+        // determine the next error
+        let error = existingState.error
+        if (chainId && allowedChainIds) {
+          // if we have a chainId allowlist and a chainId, we need to ensure it's allowed
+          const chainIdError = ensureChainIdIsAllowed(chainId, allowedChainIds)
 
-        // warn if we're going to clobber existing error
-        if (chainIdError && error) {
-          if (!(error instanceof ChainIdNotAllowedError) || error.chainId !== chainIdError.chainId) {
-            console.debug(`${error.name} is being clobbered by ${chainIdError.name}`)
+          // warn if we're going to clobber existing error
+          if (chainIdError && error) {
+            if (!(error instanceof ChainIdNotAllowedError) || error.chainId !== chainIdError.chainId) {
+              console.debug(`${error.name} is being clobbered by ${chainIdError.name}`)
+            }
           }
+
+          error = chainIdError
         }
 
-        error = chainIdError
-      }
+        // ensure that the error is cleared when appropriate
+        if (error && !(error instanceof ChainIdNotAllowedError) && chainId && accounts) {
+          error = undefined
+        }
 
-      // ensure that the error is cleared when appropriate
-      if (error && !(error instanceof ChainIdNotAllowedError) && chainId && accounts) {
-        error = undefined
-      }
+        // ensure that the activating flag is cleared when appropriate
+        let activating = existingState.activating
+        if (activating && (error || (chainId && accounts))) {
+          activating = false
+        }
 
-      // ensure that the activating flag is cleared when appropriate
-      let activating = existingState.activating
-      if (activating && (error || (chainId && accounts))) {
-        activating = false
+        return { chainId, accounts, activating, error }
       }
-
-      return { chainId, accounts, activating, error }
-    })
+    )
   }
 
   /**
@@ -136,11 +138,11 @@ export function createWeb3SolidStoreAndActions(allowedChainIds?: number[]): [Web
    *
    * @param error - The error to report. If undefined, the state will be reset to its default value.
    */
-  function reportError(error: Error | undefined): void {
+  function reportError (error: Error | undefined): void {
     nullifier++
 
     store.setState(() => ({ ...DEFAULT_STATE, error }))
   }
 
-  return [store, { startActivation, update, reportError }]
+  return [store as Web3SolidStore, { startActivation, update, reportError }]
 }
