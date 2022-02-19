@@ -3,8 +3,9 @@ import { Web3Provider } from '@ethersproject/providers'
 import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
 import { Actions, Connector, Web3SolidState, Web3SolidStore } from '@web3-solid/types'
 import { createSignal, createMemo, createEffect } from 'solid-js'
-import { EqualityChecker, UseBoundStore } from 'zustand'
-import create from 'zustand'
+import { EqualityChecker } from 'zustand'
+import { UseBoundStore } from 'solid-zustand'
+import create from 'solid-zustand'
 
 export type Web3SolidHooks = ReturnType<typeof getStateHooks> &
   ReturnType<typeof getDerivedHooks> &
