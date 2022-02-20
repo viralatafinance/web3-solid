@@ -4,7 +4,7 @@ import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
 import { Actions, Connector, Web3SolidState, Web3SolidStateAcessor, Web3SolidStore } from '@web3-solid/types'
 import { createSignal, createMemo, createEffect, onCleanup, Accessor } from 'solid-js'
 import { createStore, reconcile } from 'solid-js/store'
-import { EqualityChecker } from 'zustand'
+import { EqualityChecker, StoreApi } from 'zustand/vanilla'
 import create, { UseBoundStore } from 'solid-zustand'
 
 export type Web3SolidHooks = ReturnType<typeof getStateHooks> &
@@ -34,30 +34,7 @@ export function initializeConnector<T extends Connector> (
 
   const connector = f(actions)
 
-  // // let connectorStore: any = {}
-  // // Object.assign(connectorStore, store);
-
-  const useConnector: any = (selector = (state: any) => state, equalityFn = Object.is) => {
-    const initialValue = selector(store.getState())
-    const [state, setState] = createSignal(initialValue)
-    const listener = () => {
-      const nextState = store.getState()
-      const nextStateSlice = selector(nextState)
-      try {
-        if (!equalityFn(state, nextStateSlice)) {
-          setState(nextStateSlice)
-        }
-      } catch (e) {
-        console.warn(e)
-      }
-    }
-    const unsubscribe = store.subscribe(listener)
-    onCleanup(() => unsubscribe())
-    return state
-  }
-  Object.assign(useConnector, store)
-
-  const stateHooks = getStateHooks(useConnector)
+  const stateHooks = getStateHooks(store)
   const derivedHooks = getDerivedHooks(stateHooks)
   const augmentedHooks = getAugmentedHooks(connector, stateHooks, derivedHooks)
 
@@ -260,36 +237,60 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
 
 const CHAIN_ID = (state: Web3SolidStateAcessor) => state.chainId
 const ACCOUNTS = (state: Web3SolidStateAcessor) => state.accounts
-const ACCOUNTS_EQUALITY_CHECKER: EqualityChecker<Web3SolidStateAcessor['accounts']> = (oldAccounts, newAccounts) => {
-  return (
-    (oldAccounts === undefined && newAccounts === undefined) ||
-    (oldAccounts !== undefined &&
-      newAccounts !== undefined &&
-      oldAccounts() !== undefined &&
-      newAccounts() !== undefined &&
-      oldAccounts().length === newAccounts().length &&
-      oldAccounts().every((value, index) => value === newAccounts()[index]))
-  )
-}
-
 const ACTIVATING = (state: Web3SolidStateAcessor) => state.activating
 const ERROR = (state: Web3SolidStateAcessor) => state.error
 
-function getStateHooks (useConnector: UseBoundStore<Web3SolidStateAcessor>) {
+function getStateHooks (store: UseBoundStore<Web3SolidState, StoreApi<Web3SolidState>>) {
   function useChainId (): Web3SolidStateAcessor['chainId'] {
-    return useConnector(CHAIN_ID)
+    const [chainId, setChainId] = createSignal<number | undefined>(store.getState().chainId)
+
+    const unsubscribe = store.subscribe(() => {
+      setChainId(store.getState().chainId)
+    })
+    onCleanup(() => {
+      unsubscribe()
+    })
+
+    return chainId
   }
 
   function useAccounts (): Web3SolidStateAcessor['accounts'] {
-    return useConnector(ACCOUNTS, ACCOUNTS_EQUALITY_CHECKER)
+    const [accounts, setAccounts] = createSignal<string[] | undefined>(store.getState().accounts)
+
+    const unsubscribe = store.subscribe(() => {
+      setAccounts(store.getState().accounts)
+    })
+    onCleanup(() => {
+      unsubscribe()
+    })
+
+    return accounts
   }
 
   function useIsActivating (): Web3SolidStateAcessor['activating'] {
-    return useConnector(ACTIVATING)
+    const [activating, setActivating] = createSignal<boolean | undefined>(store.getState().activating)
+
+    const unsubscribe = store.subscribe(() => {
+      setActivating(store.getState().activating)
+    })
+    onCleanup(() => {
+      unsubscribe()
+    })
+
+    return activating
   }
 
   function useError (): Web3SolidStateAcessor['error'] {
-    return useConnector(ERROR)
+    const [error, setError] = createSignal<Error | undefined>(store.getState().error)
+
+    const unsubscribe = store.subscribe(() => {
+      setError(store.getState().error)
+    })
+    onCleanup(() => {
+      unsubscribe()
+    })
+
+    return error
   }
 
   return { useChainId, useAccounts, useIsActivating, useError }
@@ -297,7 +298,7 @@ function getStateHooks (useConnector: UseBoundStore<Web3SolidStateAcessor>) {
 
 function getDerivedHooks ({ useChainId, useAccounts, useIsActivating, useError }: ReturnType<typeof getStateHooks>) {
   function useAccount (): string | undefined {
-    return useAccounts()?.()[0]
+    return useAccounts()?.()?.[0]
   }
 
   function useIsActive (): boolean {

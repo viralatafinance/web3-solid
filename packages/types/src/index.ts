@@ -3,10 +3,10 @@ import { Accessor } from 'solid-js'
 import { State, StoreApi } from 'zustand/vanilla'
 
 export interface Web3SolidStateAcessor extends State {
-  chainId: Accessor<number> | undefined
-  accounts: Accessor<string[]> | undefined
-  activating: Accessor<boolean>
-  error: Accessor<Error> | undefined
+  chainId: Accessor<number | undefined>
+  accounts: Accessor<string[] | undefined>
+  activating: Accessor<boolean | undefined>
+  error: Accessor<Error | undefined>
 }
 
 export interface Web3SolidState extends State {

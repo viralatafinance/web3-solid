@@ -1,6 +1,7 @@
 import { getAddress } from '@ethersproject/address'
 import { Actions, Web3SolidState, Web3SolidStateUpdate, Web3SolidStore } from '@web3-solid/types'
-import create from 'solid-zustand'
+import create, { UseBoundStore } from 'solid-zustand'
+import { StoreApi } from 'zustand/vanilla'
 
 /**
  * MAX_SAFE_CHAIN_ID is the upper bound limit on what will be accepted for `chainId`
@@ -44,7 +45,9 @@ const DEFAULT_STATE = {
   error: undefined
 }
 
-export function createWeb3SolidStoreAndActions (allowedChainIds?: number[]): [Web3SolidStore, Actions] {
+export function createWeb3SolidStoreAndActions (
+  allowedChainIds?: number[]
+): [UseBoundStore<Web3SolidState, StoreApi<Web3SolidState>>, Actions] {
   if (allowedChainIds?.length === 0) {
     throw new Error(`allowedChainIds is length 0`)
   }
@@ -143,5 +146,5 @@ export function createWeb3SolidStoreAndActions (allowedChainIds?: number[]): [We
 
     store.setState(() => ({ ...DEFAULT_STATE, error }))
   }
-  return [store as Web3SolidStore, { startActivation, update, reportError }]
+  return [store, { startActivation, update, reportError }]
 }
