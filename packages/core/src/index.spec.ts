@@ -33,13 +33,13 @@ describe('#initializeConnector', () => {
     let {
       result: { current: chainId },
     } = renderHook(() => hooks.useChainId())
-    expect(chainId).toBe(undefined)
+    expect(chainId?.()).toBe(undefined)
 
     act(() => connector.update({ chainId: 1 }))
     ;({
       result: { current: chainId },
     } = renderHook(() => hooks.useChainId()))
-    expect(chainId).toBe(1)
+    expect(chainId?.()).toBe(1)
   })
 
   describe('#useAccounts', () => {
@@ -47,33 +47,33 @@ describe('#initializeConnector', () => {
       let {
         result: { current: accounts },
       } = renderHook(() => hooks.useAccounts())
-      expect(accounts).toBe(undefined)
+      expect(accounts?.()).toBe(undefined)
 
       act(() => connector.update({ accounts: [] }))
       ;({
         result: { current: accounts },
       } = renderHook(() => hooks.useAccounts()))
-      expect(accounts).toEqual([])
+      expect(accounts?.()).toEqual([])
     })
 
     test('single', () => {
       let {
         result: { current: accounts },
       } = renderHook(() => hooks.useAccounts())
-      expect(accounts).toBe(undefined)
+      expect(accounts?.()).toBe(undefined)
 
       act(() => connector.update({ accounts: ['0x0000000000000000000000000000000000000000'] }))
       ;({
         result: { current: accounts },
       } = renderHook(() => hooks.useAccounts()))
-      expect(accounts).toEqual(['0x0000000000000000000000000000000000000000'])
+      expect(accounts?.()).toEqual(['0x0000000000000000000000000000000000000000'])
     })
 
     test('multiple', () => {
       let {
         result: { current: accounts },
       } = renderHook(() => hooks.useAccounts())
-      expect(accounts).toBe(undefined)
+      expect(accounts?.()).toBe(undefined)
 
       act(() =>
         connector.update({
@@ -83,7 +83,7 @@ describe('#initializeConnector', () => {
       ;({
         result: { current: accounts },
       } = renderHook(() => hooks.useAccounts()))
-      expect(accounts).toEqual([
+      expect(accounts?.()).toEqual([
         '0x0000000000000000000000000000000000000000',
         '0x0000000000000000000000000000000000000001',
       ])
@@ -94,26 +94,26 @@ describe('#initializeConnector', () => {
     let {
       result: { current: activating },
     } = renderHook(() => hooks.useIsActivating())
-    expect(activating).toBe(false)
+    expect(activating?.()).toBe(false)
 
     await act(() => connector.activate())
     ;({
       result: { current: activating },
     } = renderHook(() => hooks.useIsActivating()))
-    expect(activating).toEqual(true)
+    expect(activating?.()).toEqual(true)
   })
 
   test('#useError', () => {
     let {
       result: { current: error },
     } = renderHook(() => hooks.useError())
-    expect(error).toBe(undefined)
+    expect(error?.()).toBe(undefined)
 
     act(() => connector.reportError(new Error()))
     ;({
       result: { current: error },
     } = renderHook(() => hooks.useError()))
-    expect(error).toBeInstanceOf(Error)
+    expect(error?.()).toBeInstanceOf(Error)
   })
 })
 

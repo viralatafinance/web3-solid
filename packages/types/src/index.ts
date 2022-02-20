@@ -1,5 +1,13 @@
-import type { EventEmitter } from 'node:events'
-import type { State, StoreApi } from 'zustand/vanilla'
+import { EventEmitter } from 'node:events'
+import { Accessor } from 'solid-js'
+import { State, StoreApi } from 'zustand/vanilla'
+
+export interface Web3SolidStateAcessor extends State {
+  chainId: Accessor<number> | undefined
+  accounts: Accessor<string[]> | undefined
+  activating: Accessor<boolean>
+  error: Accessor<Error> | undefined
+}
 
 export interface Web3SolidState extends State {
   chainId: number | undefined
@@ -83,20 +91,20 @@ export abstract class Connector {
    * @param actions - Methods bound to a zustand store that tracks the state of the connector.
    * Actions are used by the connector to report changes in connection status.
    */
-  constructor(actions: Actions) {
+  constructor (actions: Actions) {
     this.actions = actions
   }
 
   /**
    * Initiate a connection.
    */
-  public abstract activate(...args: unknown[]): Promise<void> | void
+  public abstract activate (...args: unknown[]): Promise<void> | void
 
   /**
    * Initiate a disconnect.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public deactivate(...args: unknown[]): Promise<void> | void {
+  public deactivate (...args: unknown[]): Promise<void> | void {
     this.actions.reportError(undefined)
   }
 }

@@ -1,8 +1,8 @@
 import { Networkish } from '@ethersproject/networks'
 import { Web3Provider } from '@ethersproject/providers'
 import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
-import { Actions, Connector, Web3SolidState, Web3SolidStore } from '@web3-solid/types'
-import { createSignal, createMemo, createEffect, onCleanup } from 'solid-js'
+import { Actions, Connector, Web3SolidState, Web3SolidStateAcessor, Web3SolidStore } from '@web3-solid/types'
+import { createSignal, createMemo, createEffect, onCleanup, Accessor } from 'solid-js'
 import { createStore, reconcile } from 'solid-js/store'
 import { EqualityChecker } from 'zustand'
 import create, { UseBoundStore } from 'solid-zustand'
@@ -53,7 +53,7 @@ export function initializeConnector<T extends Connector> (
     }
     const unsubscribe = store.subscribe(listener)
     onCleanup(() => unsubscribe())
-    return state()
+    return state
   }
   Object.assign(useConnector, store)
 
@@ -64,8 +64,8 @@ export function initializeConnector<T extends Connector> (
   return [connector, { ...stateHooks, ...derivedHooks, ...augmentedHooks }, store]
 }
 
-function computeIsActive ({ chainId, accounts, activating, error }: Web3SolidState) {
-  return Boolean(chainId && accounts && !activating && !error)
+function computeIsActive ({ chainId, accounts, activating, error }: Web3SolidStateAcessor) {
+  return Boolean(chainId?.() && accounts?.() && !activating?.() && !error?.())
 }
 
 /**
@@ -258,35 +258,37 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
   }
 }
 
-const CHAIN_ID = (state: Web3SolidState) => state.chainId
-const ACCOUNTS = (state: Web3SolidState) => state.accounts
-const ACCOUNTS_EQUALITY_CHECKER: EqualityChecker<Web3SolidState['accounts']> = (oldAccounts, newAccounts) => {
+const CHAIN_ID = (state: Web3SolidStateAcessor) => state.chainId
+const ACCOUNTS = (state: Web3SolidStateAcessor) => state.accounts
+const ACCOUNTS_EQUALITY_CHECKER: EqualityChecker<Web3SolidStateAcessor['accounts']> = (oldAccounts, newAccounts) => {
   return (
     (oldAccounts === undefined && newAccounts === undefined) ||
     (oldAccounts !== undefined &&
       newAccounts !== undefined &&
-      oldAccounts.length === newAccounts.length &&
-      oldAccounts.every((value, index) => value === newAccounts[index]))
+      oldAccounts() !== undefined &&
+      newAccounts() !== undefined &&
+      oldAccounts().length === newAccounts().length &&
+      oldAccounts().every((value, index) => value === newAccounts()[index]))
   )
 }
 
-const ACTIVATING = (state: Web3SolidState) => state.activating
-const ERROR = (state: Web3SolidState) => state.error
+const ACTIVATING = (state: Web3SolidStateAcessor) => state.activating
+const ERROR = (state: Web3SolidStateAcessor) => state.error
 
-function getStateHooks (useConnector: UseBoundStore<Web3SolidState>) {
-  function useChainId (): Web3SolidState['chainId'] {
+function getStateHooks (useConnector: UseBoundStore<Web3SolidStateAcessor>) {
+  function useChainId (): Web3SolidStateAcessor['chainId'] {
     return useConnector(CHAIN_ID)
   }
 
-  function useAccounts (): Web3SolidState['accounts'] {
+  function useAccounts (): Web3SolidStateAcessor['accounts'] {
     return useConnector(ACCOUNTS, ACCOUNTS_EQUALITY_CHECKER)
   }
 
-  function useIsActivating (): Web3SolidState['activating'] {
+  function useIsActivating (): Web3SolidStateAcessor['activating'] {
     return useConnector(ACTIVATING)
   }
 
-  function useError (): Web3SolidState['error'] {
+  function useError (): Web3SolidStateAcessor['error'] {
     return useConnector(ERROR)
   }
 
@@ -295,7 +297,7 @@ function getStateHooks (useConnector: UseBoundStore<Web3SolidState>) {
 
 function getDerivedHooks ({ useChainId, useAccounts, useIsActivating, useError }: ReturnType<typeof getStateHooks>) {
   function useAccount (): string | undefined {
-    return useAccounts()?.[0]
+    return useAccounts()?.()[0]
   }
 
   function useIsActive (): boolean {
@@ -376,7 +378,7 @@ function getAugmentedHooks<T extends Connector> (
 
   function useENSNames (provider: Web3Provider | undefined): (string | null)[] | undefined {
     const accounts = useAccounts()
-    return useENS(provider, accounts)
+    return useENS(provider, accounts?.())
   }
 
   function useENSName (provider: Web3Provider | undefined): (string | null) | undefined {
