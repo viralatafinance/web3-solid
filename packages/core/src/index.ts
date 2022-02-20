@@ -41,10 +41,6 @@ export function initializeConnector<T extends Connector> (
   return [connector, { ...stateHooks, ...derivedHooks, ...augmentedHooks }, store]
 }
 
-function computeIsActive ({ chainId, accounts, activating, error }: Web3SolidStateAcessor) {
-  return Boolean(chainId?.() && accounts?.() && !activating?.() && !error?.())
-}
-
 /**
  * Creates a variety of convenience `hooks` that return data associated with a particular passed connector.
  *
@@ -297,22 +293,17 @@ function getStateHooks (store: UseBoundStore<Web3SolidState, StoreApi<Web3SolidS
 }
 
 function getDerivedHooks ({ useChainId, useAccounts, useIsActivating, useError }: ReturnType<typeof getStateHooks>) {
-  function useAccount (): string | undefined {
-    return useAccounts()?.()?.[0]
+  function useAccount (): Accessor<string | undefined> {
+    const accounts = useAccounts()
+    return createMemo(() => accounts()?.[0])
   }
 
-  function useIsActive (): boolean {
+  function useIsActive (): Accessor<boolean | undefined> {
     const chainId = useChainId()
     const accounts = useAccounts()
     const activating = useIsActivating()
     const error = useError()
-
-    return computeIsActive({
-      chainId,
-      accounts,
-      activating,
-      error
-    })
+    return createMemo(() => !!chainId() && !!accounts() && !activating() && !error())
   }
 
   return { useAccount, useIsActive }
@@ -379,14 +370,22 @@ function getAugmentedHooks<T extends Connector> (
 
   function useENSNames (provider: Web3Provider | undefined): (string | null)[] | undefined {
     const accounts = useAccounts()
-    return useENS(provider, accounts?.())
+    return useENS(provider, accounts())
   }
 
   function useENSName (provider: Web3Provider | undefined): (string | null) | undefined {
     const account = useAccount()
-    const accounts = createMemo(() => (account === undefined ? undefined : [account]))
+    const accounts = createMemo(() => {
+      if (account() == undefined) {
+        return undefined
+      } else {
+        return [account() as string]
+      }
+    })
 
-    return useENS(provider, accounts())?.[0]
+    const ens = useENS(provider, accounts())
+
+    return ens?.[0]
   }
 
   // for backwards compatibility only
