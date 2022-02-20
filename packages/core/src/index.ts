@@ -45,10 +45,10 @@ export function initializeConnector<T extends Connector> (
       const nextStateSlice = selector(nextState)
       try {
         if (!equalityFn(state, nextStateSlice)) {
-          setState(reconcile(nextStateSlice))
+          setState(nextStateSlice)
         }
       } catch (e) {
-        
+        console.warn(e)
       }
     }
     const unsubscribe = store.subscribe(listener)
