@@ -39,7 +39,7 @@ export function initializeConnector<T extends Connector> (
 
   const useConnector: any = (selector = (state: any) => state, equalityFn = Object.is) => {
     const initialValue = selector(store.getState())
-    const [state, setState] = createStore(initialValue)
+    const [state, setState] = createSignal(initialValue)
     const listener = () => {
       const nextState = store.getState()
       const nextStateSlice = selector(nextState)
@@ -53,7 +53,7 @@ export function initializeConnector<T extends Connector> (
     }
     const unsubscribe = store.subscribe(listener)
     onCleanup(() => unsubscribe())
-    return state
+    return state()
   }
   Object.assign(useConnector, store)
 
