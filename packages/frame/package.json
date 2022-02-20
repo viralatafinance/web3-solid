@@ -29,7 +29,10 @@
     "start": "tsc --watch"
   },
   "dependencies": {
-    "@web3-solid/types": "^1.0.4"
+    "@web3-solid/types": "^1.0.4",
+    "solid-js": "^1.3.7",
+    "solid-zustand": "^1.2.0",
+    "zustand": "3.6.0"
   },
   "peerDependencies": {
     "eth-provider": "^0.9.4"

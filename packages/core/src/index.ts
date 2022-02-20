@@ -2,10 +2,10 @@ import { Networkish } from '@ethersproject/networks'
 import { Web3Provider } from '@ethersproject/providers'
 import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
 import { Actions, Connector, Web3SolidState, Web3SolidStore } from '@web3-solid/types'
-import { createSignal, createMemo, createEffect } from 'solid-js'
+import { createSignal, createMemo, createEffect, onCleanup } from 'solid-js'
+import { createStore, reconcile } from 'solid-js/store'
 import { EqualityChecker } from 'zustand'
-import { UseBoundStore } from 'solid-zustand'
-import create from 'solid-zustand'
+import create, { UseBoundStore } from 'solid-zustand'
 
 export type Web3SolidHooks = ReturnType<typeof getStateHooks> &
   ReturnType<typeof getDerivedHooks> &
@@ -33,7 +33,29 @@ export function initializeConnector<T extends Connector> (
   const [store, actions] = createWeb3SolidStoreAndActions(allowedChainIds)
 
   const connector = f(actions)
-  const useConnector = create<Web3SolidState>(store)
+
+  // // let connectorStore: any = {}
+  // // Object.assign(connectorStore, store);
+
+  const useConnector: any = (selector = (state: any) => state, equalityFn = Object.is) => {
+    const initialValue = selector(store.getState())
+    const [state, setState] = createStore(initialValue)
+    const listener = () => {
+      const nextState = store.getState()
+      const nextStateSlice = selector(nextState)
+      try {
+        if (!equalityFn(state, nextStateSlice)) {
+          setState(reconcile(nextStateSlice))
+        }
+      } catch (e) {
+        
+      }
+    }
+    const unsubscribe = store.subscribe(listener)
+    onCleanup(() => unsubscribe())
+    return state
+  }
+  Object.assign(useConnector, store)
 
   const stateHooks = getStateHooks(useConnector)
   const derivedHooks = getDerivedHooks(stateHooks)
@@ -238,11 +260,16 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
 
 const CHAIN_ID = (state: Web3SolidState) => state.chainId
 const ACCOUNTS = (state: Web3SolidState) => state.accounts
-const ACCOUNTS_EQUALITY_CHECKER: EqualityChecker<Web3SolidState['accounts']> = (oldAccounts, newAccounts) =>
-  (oldAccounts === undefined && newAccounts === undefined) ||
-  (oldAccounts !== undefined &&
-    oldAccounts.length === newAccounts?.length &&
-    oldAccounts.every((oldAccount, i) => oldAccount === newAccounts[i]))
+const ACCOUNTS_EQUALITY_CHECKER: EqualityChecker<Web3SolidState['accounts']> = (oldAccounts, newAccounts) => {
+  return (
+    (oldAccounts === undefined && newAccounts === undefined) ||
+    (oldAccounts !== undefined &&
+      newAccounts !== undefined &&
+      oldAccounts.length === newAccounts.length &&
+      oldAccounts.every((value, index) => value === newAccounts[index]))
+  )
+}
+
 const ACTIVATING = (state: Web3SolidState) => state.activating
 const ERROR = (state: Web3SolidState) => state.error
 

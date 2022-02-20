@@ -143,6 +143,5 @@ export function createWeb3SolidStoreAndActions (allowedChainIds?: number[]): [We
 
     store.setState(() => ({ ...DEFAULT_STATE, error }))
   }
-
   return [store as Web3SolidStore, { startActivation, update, reportError }]
 }
