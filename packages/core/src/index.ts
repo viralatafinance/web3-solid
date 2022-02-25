@@ -159,10 +159,9 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
   } = getSelectedConnector(...initializedConnectors)
 
   function usePriorityConnector () {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const values = initializedConnectors.map(([, { useIsActive }]) => useIsActive())
-    const index = values.findIndex(isActive => isActive())
-    return initializedConnectors[index === -1 ? 0 : index][0]
+    const index = createMemo(() => values.findIndex(isActive => isActive()))
+    return initializedConnectors[index() === -1 ? 0 : index()][0]
   }
 
   function usePriorityChainId () {
