@@ -236,10 +236,6 @@ function getStateHooks (store: UseBoundStore<Web3SolidState, StoreApi<Web3SolidS
   const [activating, setActivating] = createSignal<boolean | undefined>(store.getState().activating, { equals: false })
   const [error, setError] = createSignal<Error | undefined>(store.getState().error, { equals: false })
 
-  const useChainId = createMemo(() => {
-    return () => store.getState().chainId
-  })
-
   const unsubscribe = store.subscribe(state => {
     setChainId(() => state.chainId)
     setAccounts(() => state.accounts)
@@ -250,9 +246,9 @@ function getStateHooks (store: UseBoundStore<Web3SolidState, StoreApi<Web3SolidS
     unsubscribe()
   })
 
-  // function useChainId (): Web3SolidStateAcessor['chainId'] {
-  //   return chainId
-  // }
+  function useChainId (): Web3SolidStateAcessor['chainId'] {
+    return chainId
+  }
 
   function useAccounts (): Web3SolidStateAcessor['accounts'] {
     return accounts
