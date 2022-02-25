@@ -322,7 +322,7 @@ function getAugmentedHooks<T extends Connector> (
     import('@ethersproject/providers')
       .then(setProviders)
       .catch(() => {
-        console.debug('@ethersproject/providers not available')
+        console.debug('@ethersproject/providers is not available')
       })
   })
 
