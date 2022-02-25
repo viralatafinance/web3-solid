@@ -237,10 +237,10 @@ function getStateHooks (store: UseBoundStore<Web3SolidState, StoreApi<Web3SolidS
   const [error, setError] = createSignal<Error | undefined>(store.getState().error)
 
   const unsubscribe = store.subscribe(state => {
-    setChainId(state.chainId)
-    setAccounts(state.accounts)
-    setActivating(state.activating)
-    setError(state.error)
+    setChainId(() => state.chainId)
+    setAccounts(() => state.accounts)
+    setActivating(() => state.activating)
+    setError(() => state.error)
   })
   onCleanup(() => {
     unsubscribe()
