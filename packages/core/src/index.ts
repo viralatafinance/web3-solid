@@ -3,9 +3,8 @@ import { Web3Provider } from '@ethersproject/providers'
 import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
 import { Actions, Connector, Web3SolidState, Web3SolidStateAcessor, Web3SolidStore } from '@web3-solid/types'
 import { createSignal, createMemo, createEffect, onCleanup, Accessor } from 'solid-js'
-import { createStore, reconcile } from 'solid-js/store'
-import { EqualityChecker, StoreApi } from 'zustand/vanilla'
-import create, { UseBoundStore } from 'solid-zustand'
+import { StoreApi } from 'zustand/vanilla'
+import { UseBoundStore } from 'solid-zustand'
 
 export type Web3SolidHooks = ReturnType<typeof getStateHooks> &
   ReturnType<typeof getDerivedHooks> &
@@ -162,7 +161,7 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
   function usePriorityConnector () {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const values = initializedConnectors.map(([, { useIsActive }]) => useIsActive())
-    const index = values.findIndex(isActive => isActive)
+    const index = values.findIndex(isActive => isActive())
     return initializedConnectors[index === -1 ? 0 : index][0]
   }
 
@@ -231,61 +230,35 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
   }
 }
 
-const CHAIN_ID = (state: Web3SolidStateAcessor) => state.chainId
-const ACCOUNTS = (state: Web3SolidStateAcessor) => state.accounts
-const ACTIVATING = (state: Web3SolidStateAcessor) => state.activating
-const ERROR = (state: Web3SolidStateAcessor) => state.error
-
 function getStateHooks (store: UseBoundStore<Web3SolidState, StoreApi<Web3SolidState>>) {
+  const [chainId, setChainId] = createSignal<number | undefined>(store.getState().chainId)
+  const [accounts, setAccounts] = createSignal<string[] | undefined>(store.getState().accounts)
+  const [activating, setActivating] = createSignal<boolean | undefined>(store.getState().activating)
+  const [error, setError] = createSignal<Error | undefined>(store.getState().error)
+
+  const unsubscribe = store.subscribe(({ chainId, accounts, activating, error }) => {
+    setChainId(chainId)
+    setAccounts(accounts)
+    setActivating(activating)
+    setError(error)
+  })
+  onCleanup(() => {
+    unsubscribe()
+  })
+
   function useChainId (): Web3SolidStateAcessor['chainId'] {
-    const [chainId, setChainId] = createSignal<number | undefined>(store.getState().chainId)
-
-    const unsubscribe = store.subscribe(() => {
-      setChainId(store.getState().chainId)
-    })
-    onCleanup(() => {
-      unsubscribe()
-    })
-
     return chainId
   }
 
   function useAccounts (): Web3SolidStateAcessor['accounts'] {
-    const [accounts, setAccounts] = createSignal<string[] | undefined>(store.getState().accounts)
-
-    const unsubscribe = store.subscribe(() => {
-      setAccounts(store.getState().accounts)
-    })
-    onCleanup(() => {
-      unsubscribe()
-    })
-
     return accounts
   }
 
   function useIsActivating (): Web3SolidStateAcessor['activating'] {
-    const [activating, setActivating] = createSignal<boolean | undefined>(store.getState().activating)
-
-    const unsubscribe = store.subscribe(() => {
-      setActivating(store.getState().activating)
-    })
-    onCleanup(() => {
-      unsubscribe()
-    })
-
     return activating
   }
 
   function useError (): Web3SolidStateAcessor['error'] {
-    const [error, setError] = createSignal<Error | undefined>(store.getState().error)
-
-    const unsubscribe = store.subscribe(() => {
-      setError(store.getState().error)
-    })
-    onCleanup(() => {
-      unsubscribe()
-    })
-
     return error
   }
 
@@ -300,10 +273,12 @@ function getDerivedHooks ({ useChainId, useAccounts, useIsActivating, useError }
 
   function useIsActive (): Accessor<boolean | undefined> {
     const chainId = useChainId()
-    const accounts = useAccounts()
+    const account = useAccount()
     const activating = useIsActivating()
     const error = useError()
-    return createMemo(() => !!chainId() && !!accounts() && !activating() && !error())
+    return createMemo(() => {
+      return chainId() !== undefined && account() !== undefined && activating() === false && error() === undefined
+    })
   }
 
   return { useAccount, useIsActive }
@@ -341,21 +316,21 @@ function getAugmentedHooks<T extends Connector> (
   { useChainId, useAccounts, useError }: ReturnType<typeof getStateHooks>,
   { useAccount, useIsActive }: ReturnType<typeof getDerivedHooks>
 ) {
+  
+  // trigger the dynamic import on mount
+  const [providers, setProviders] = createSignal<{ Web3Provider: typeof Web3Provider } | undefined>(undefined)
+  createEffect(() => {
+    import('@ethersproject/providers')
+      .then(setProviders)
+      .catch(() => {
+        console.debug('@ethersproject/providers not available')
+      })
+  })
+
   function useProvider (network?: Networkish, enabled = true): Web3Provider | undefined {
     const isActive = useIsActive()
-
     const chainId = useChainId()
     const accounts = useAccounts()
-
-    // trigger the dynamic import on mount
-    const [providers, setProviders] = createSignal<{ Web3Provider: typeof Web3Provider } | undefined>(undefined)
-    createEffect(() => {
-      import('@ethersproject/providers')
-        .then(setProviders)
-        .catch(() => {
-          console.debug('@ethersproject/providers not available')
-        })
-    })
 
     const value = createMemo(() => {
       // we use chainId and accounts to re-render in case connector.provider changes in place
