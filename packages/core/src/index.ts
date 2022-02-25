@@ -231,10 +231,10 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
 }
 
 function getStateHooks (store: UseBoundStore<Web3SolidState, StoreApi<Web3SolidState>>) {
-  const [chainId, setChainId] = createSignal<number | undefined>(store.getState().chainId)
-  const [accounts, setAccounts] = createSignal<string[] | undefined>(store.getState().accounts)
-  const [activating, setActivating] = createSignal<boolean | undefined>(store.getState().activating)
-  const [error, setError] = createSignal<Error | undefined>(store.getState().error)
+  const [chainId, setChainId] = createSignal<number | undefined>(store.getState().chainId, { equals: false })
+  const [accounts, setAccounts] = createSignal<string[] | undefined>(store.getState().accounts, { equals: false })
+  const [activating, setActivating] = createSignal<boolean | undefined>(store.getState().activating, { equals: false })
+  const [error, setError] = createSignal<Error | undefined>(store.getState().error, { equals: false })
 
   const unsubscribe = store.subscribe(state => {
     setChainId(() => state.chainId)
