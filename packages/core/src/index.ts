@@ -164,9 +164,16 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
     return initializedConnectors[index === -1 ? 0 : index][0]
   })
 
-  function usePriorityChainId () {
-    return useSelectedChainId(usePriorityConnector())
+  function getIndex (connector: Connector) {
+    const index = initializedConnectors.findIndex(([initializedConnector]) => connector === initializedConnector)
+    if (index === -1) throw new Error('Connector not found')
+    return index
   }
+
+  const usePriorityChainId = createMemo(() => {
+    const values = initializedConnectors.map(([, { useChainId }]) => useChainId())
+    return values[getIndex(usePriorityConnector())]
+  })
 
   function usePriorityAccounts () {
     return useSelectedAccounts(usePriorityConnector())
