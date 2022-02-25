@@ -2,7 +2,7 @@ import { Networkish } from '@ethersproject/networks'
 import { Web3Provider } from '@ethersproject/providers'
 import { createWeb3SolidStoreAndActions } from '@web3-solid/store'
 import { Actions, Connector, Web3SolidState, Web3SolidStateAcessor, Web3SolidStore } from '@web3-solid/types'
-import { createSignal, createMemo, createEffect, onCleanup, Accessor, createComputed } from 'solid-js'
+import { createSignal, createMemo, createEffect, onCleanup, Accessor } from 'solid-js'
 import { StoreApi } from 'zustand/vanilla'
 import { UseBoundStore } from 'solid-zustand'
 
@@ -158,11 +158,11 @@ export function getPriorityConnector (...initializedConnectors: [Connector, Web3
     useSelectedWeb3Solid
   } = getSelectedConnector(...initializedConnectors)
 
-  function usePriorityConnector () {
+  const usePriorityConnector = createMemo(() => {
     const values = initializedConnectors.map(([, { useIsActive }]) => useIsActive())
     const index = values.findIndex(isActive => isActive())
     return initializedConnectors[index === -1 ? 0 : index][0]
-  }
+  })
 
   function usePriorityChainId () {
     return useSelectedChainId(usePriorityConnector())
@@ -275,7 +275,9 @@ function getDerivedHooks ({ useChainId, useAccounts, useIsActivating, useError }
     const account = useAccount()
     const activating = useIsActivating()
     const error = useError()
-    return () => chainId() !== undefined && account() !== undefined && activating() === false && error() === undefined
+    return createMemo(() => {
+      return chainId() !== undefined && account() !== undefined && activating() === false && error() === undefined
+    })
   }
 
   return { useAccount, useIsActive }

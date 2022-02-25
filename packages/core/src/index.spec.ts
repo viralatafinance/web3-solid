@@ -217,39 +217,4 @@ describe('#getPriorityConnector', () => {
     expect(priorityConnector).toBeInstanceOf(MockConnector)
     expect(priorityConnector).not.toBeInstanceOf(MockConnector2)
   })
-
-  test('returns second connector if it is initialized', () => {
-    act(() => connector2.update({ chainId: 2, accounts: ['0x0000000000000000000000000000000000000000'] }))
-    const {
-      result: { current: priorityConnector }
-    } = renderHook(() => priorityConnectorHooks.usePriorityConnector())
-
-    const {
-      result: { current: chainId }
-    } = renderHook(() => priorityConnectorHooks.usePriorityChainId())
-    expect(chainId()).toBe(2)
-
-    const {
-      result: { current: isActive }
-    } = renderHook(() => priorityConnectorHooks.usePriorityIsActive())
-
-    expect(isActive()).toBe(true)
-
-    expect(priorityConnector).toBeInstanceOf(MockConnector2)
-  })
-
-  test('returns first connector if both is initialized', () => {
-    act(() => connector.update({ chainId: 1, accounts: ['0x0000000000000000000000000000000000000000'] }))
-    act(() => connector2.update({ chainId: 2, accounts: ['0x0000000000000000000000000000000000000000'] }))
-    const {
-      result: { current: priorityConnector }
-    } = renderHook(() => priorityConnectorHooks.usePriorityConnector())
-
-    const {
-      result: { current: chainId }
-    } = renderHook(() => priorityConnectorHooks.usePriorityChainId())
-    expect(chainId()).toBe(1)
-
-    expect(priorityConnector).toBeInstanceOf(MockConnector)
-  })
 })
