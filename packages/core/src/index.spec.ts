@@ -33,13 +33,13 @@ describe('#initializeConnector', () => {
     let {
       result: { current: chainId }
     } = renderHook(() => hooks.useChainId())
-    expect(chainId?.()).toBe(undefined)
+    expect(chainId()).toBe(undefined)
 
     act(() => connector.update({ chainId: 1 }))
     ;({
       result: { current: chainId }
     } = renderHook(() => hooks.useChainId()))
-    expect(chainId?.()).toBe(1)
+    expect(chainId()).toBe(1)
   })
 
   describe('#useAccounts', () => {
