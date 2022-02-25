@@ -236,11 +236,11 @@ function getStateHooks (store: UseBoundStore<Web3SolidState, StoreApi<Web3SolidS
   const [activating, setActivating] = createSignal<boolean | undefined>(store.getState().activating)
   const [error, setError] = createSignal<Error | undefined>(store.getState().error)
 
-  const unsubscribe = store.subscribe(({ chainId, accounts, activating, error }) => {
-    setChainId(chainId)
-    setAccounts(accounts)
-    setActivating(activating)
-    setError(error)
+  const unsubscribe = store.subscribe(state => {
+    setChainId(state.chainId)
+    setAccounts(state.accounts)
+    setActivating(state.activating)
+    setError(state.error)
   })
   onCleanup(() => {
     unsubscribe()
@@ -316,7 +316,6 @@ function getAugmentedHooks<T extends Connector> (
   { useChainId, useAccounts, useError }: ReturnType<typeof getStateHooks>,
   { useAccount, useIsActive }: ReturnType<typeof getDerivedHooks>
 ) {
-  
   // trigger the dynamic import on mount
   const [providers, setProviders] = createSignal<{ Web3Provider: typeof Web3Provider } | undefined>(undefined)
   createEffect(() => {
